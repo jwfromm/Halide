@@ -1799,6 +1799,7 @@ private:
         }
 
         int64_t ia = 0, ib = 0, ic = 0, id = 0;
+        (void) id;
         uint64_t ua = 0, ub = 0;
         double fa = 0.0f, fb = 0.0f;
 
@@ -2094,7 +2095,10 @@ private:
             // (y + 8) / 2 -> y/2 + 4
             Expr ratio = make_const(op->type, div_imp(ia, ib));
             return mutate((add_a->a / b) + ratio);
-        } else if (no_overflow(op->type) &&
+        }
+#define BREAK_STORAGE_FOLDING 1
+#if BREAK_STORAGE_FOLDING
+        else if (no_overflow(op->type) &&
                    add_a &&
                    const_int(add_a->b, &ib) &&
                    mul_a_a &&
@@ -2108,7 +2112,9 @@ private:
             ib = div_imp(ib, id);
             ic = div_imp(ic, id);
             return mutate((mul_a_a->a * make_const(op->type, ia) + make_const(op->type, ib)) / make_const(op->type, ic));
-        } else if (no_overflow(op->type) &&
+        }
+#endif
+        else if (no_overflow(op->type) &&
                    add_a &&
                    equal(add_a->a, b)) {
             // (x + y)/x -> y/x + 1
